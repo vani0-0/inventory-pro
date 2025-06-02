@@ -1,0 +1,44 @@
+generator client {
+  provider = "prisma-client-js"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Product {
+  id           String        @id @default(uuid())
+  name         String
+  sku          String        @unique
+  category     String
+  description  String?
+  price        Float
+  createdAt    DateTime      @default(now())
+  updatedAt    DateTime      @updatedAt
+  transactions Transaction[]
+
+  @@map("products")
+}
+
+model Transaction {
+  id        String          @id @default(uuid())
+  productId String
+  type      TransactionType
+  quantity  Int
+  reason    String?
+  createdAt DateTime        @default(now())
+  updatedAt DateTime        @updatedAt
+
+  product Product @relation(fields: [productId], references: [id])
+
+  @@map("transactions")
+}
+
+enum TransactionType {
+  PURCHASE
+  SALE
+  ADJUSTMENT
+  RETURN
+}
