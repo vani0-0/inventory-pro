@@ -1,5 +1,5 @@
 export const siteConfig = {
-  name: "CSR",
+  name: "Inventory Pro",
   description: "",
   url: "https://inventory-pro-rho.vercel.app/api/products",
 };
