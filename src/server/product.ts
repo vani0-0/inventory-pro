@@ -163,3 +163,14 @@ export async function addProduct(data: AddProductSchema) {
     throw error;
   }
 }
+
+export async function addBulkProduct(data: AddProductSchema[]) {
+  const results = await Promise.allSettled(
+    data.map((item) => addProduct(item))
+  );
+
+  const successful = results.filter((result) => result.status === "fulfilled");
+  const failed = results.filter((result) => result.status === "rejected");
+
+  return { successful, failed };
+}
