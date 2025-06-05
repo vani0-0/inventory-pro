@@ -2,26 +2,26 @@
 
 import prisma from "@/lib/prisma";
 import { AddProductSchema, addProductSchema } from "@/lib/zod";
-import { ProductStatus, ProductTable } from "@/types/product.type";
+import {
+  ProductCashier,
+  ProductStatus,
+  ProductTable,
+} from "@/types/product.type";
 import { subWeeks } from "date-fns";
 import { z } from "zod";
 
 export async function getOverviews() {
   const oneWeekAgo = subWeeks(new Date(), 1);
 
+  // Sum quantity as is (positive for purchases/returns, negative for sales/adjustments)
   const currentStocks = await prisma.$queryRaw<
     {
       productId: string;
-      quantity: number;
+      quantity: bigint;
     }[]
   >`
-    SELECT "productId", 
-      SUM(
-        CASE 
-          WHEN "type" IN ('PURCHASE', 'RETURN') THEN quantity
-          ELSE -quantity
-        END
-      ) AS quantity
+    SELECT "productId",
+      COALESCE(SUM(quantity), 0) AS quantity
     FROM transactions
     GROUP BY "productId"
   `;
@@ -29,22 +29,17 @@ export async function getOverviews() {
   const lastWeekStocks = await prisma.$queryRaw<
     {
       productId: string;
-      quantity: number;
+      quantity: bigint;
     }[]
   >`
-    SELECT "productId", 
-      SUM(
-        CASE 
-          WHEN "type" IN ('PURCHASE', 'RETURN') THEN quantity
-          ELSE -quantity
-        END
-      ) AS quantity
+    SELECT "productId",
+      COALESCE(SUM(quantity), 0) AS quantity
     FROM transactions
     WHERE "createdAt" <= ${oneWeekAgo}
     GROUP BY "productId"
   `;
 
-  function countStatus(stocks: { productId: string; quantity: number }[]) {
+  function countStatus(stocks: { productId: string; quantity: bigint }[]) {
     let total = 0,
       lowStock = 0,
       outOfStock = 0;
@@ -83,6 +78,40 @@ export async function getOverviews() {
   };
 }
 
+export async function getProductsForeSale(): Promise<ProductCashier[]> {
+  const products = await prisma.product.findMany({
+    orderBy: { createdAt: "desc" },
+  });
+
+  const stocks = await prisma.$queryRaw<
+    {
+      productId: string;
+      quantity: bigint;
+    }[]
+  >`
+    SELECT "productId",
+      COALESCE(SUM(quantity), 0) AS quantity
+    FROM transactions
+    GROUP BY "productId"
+  `;
+
+  const stockMap = new Map(
+    stocks.map((s) => [s.productId, Number(s.quantity)])
+  );
+
+  return products.map((product) => {
+    const quantity = stockMap.get(product.id) ?? 0;
+    return {
+      id: product.id,
+      name: product.name,
+      sku: product.sku,
+      price: product.price,
+      stock: quantity,
+      category: product.category,
+    } satisfies ProductCashier;
+  });
+}
+
 export async function getProducts(): Promise<ProductTable[]> {
   const products = await prisma.product.findMany({
     orderBy: { createdAt: "desc" },
@@ -91,21 +120,18 @@ export async function getProducts(): Promise<ProductTable[]> {
   const stocks = await prisma.$queryRaw<
     {
       productId: string;
-      quantity: number;
+      quantity: bigint;
     }[]
   >`
-  SELECT "productId",
-    SUM(
-      CASE
-        WHEN "type" IN ('PURCHASE', 'RETURN') THEN quantity
-        ELSE -quantity
-      END
-    ) AS quantity
-  FROM transactions
-  GROUP BY "productId"
-`;
+    SELECT "productId",
+      COALESCE(SUM(quantity), 0) AS quantity
+    FROM transactions
+    GROUP BY "productId"
+  `;
 
-  const stockMap = new Map(stocks.map((s) => [s.productId, s.quantity]));
+  const stockMap = new Map(
+    stocks.map((s) => [s.productId, Number(s.quantity)])
+  );
 
   return products.map((product) => {
     const quantity = stockMap.get(product.id) ?? 0;

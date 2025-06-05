@@ -38,7 +38,7 @@ export function RecentTransactions() {
     <div className="space-y-4">
       {data.map((activity) => {
         const config = typeConfig[activity.type as keyof typeof typeConfig];
-
+        console.log(config);
         return (
           <div
             key={activity.id}
@@ -51,6 +51,11 @@ export function RecentTransactions() {
                   {config.action} {activity.quantity} {activity.item}
                 </span>
               </p>
+              {activity.reason && (
+                <p className="text-xs italic text-muted-foreground">
+                  {activity.reason}
+                </p>
+              )}
               <p className="text-xs text-muted-foreground">
                 {formatDistanceToNow(new Date(activity.timestamp), {
                   addSuffix: true,

@@ -17,6 +17,7 @@ model Product {
   createdAt    DateTime      @default(now())
   updatedAt    DateTime      @updatedAt
   transactions Transaction[]
+  saleItems    SaleItem[]
 
   @@map("products")
 }
@@ -35,9 +36,44 @@ model Transaction {
   @@map("transactions")
 }
 
+model SaleItem {
+  id        String @id @default(uuid())
+  saleId    String
+  productId String
+  quantity  Int
+  price     Float // Price at the time of sale
+  total     Float
+
+  product Product @relation(fields: [productId], references: [id])
+  sale    Sale    @relation(fields: [saleId], references: [id])
+
+  @@map("sale_items")
+}
+
+model Sale {
+  id            String            @id @default(uuid())
+  customerName  String?
+  paymentMethod PaymentMethodType
+  totalAmount   Float
+  amountPaid    Float
+  change        Float
+  createdAt     DateTime          @default(now())
+  updatedAt     DateTime          @updatedAt
+  saleItems     SaleItem[]
+
+  @@map("sales")
+}
+
 enum TransactionType {
   PURCHASE
   SALE
   ADJUSTMENT
   RETURN
+}
+
+enum PaymentMethodType {
+  CASH
+  CREDIT_CARD
+  DEBIT_CARD
+  ONLINE
 }

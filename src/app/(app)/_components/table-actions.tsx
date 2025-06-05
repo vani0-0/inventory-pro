@@ -9,6 +9,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { ProductTable } from "@/types/product.type";
 import { MoreHorizontalIcon, Trash } from "lucide-react";
+import { toast } from "sonner";
 
 export function TableActions({ data }: { data: ProductTable }) {
   return (
@@ -22,7 +23,7 @@ export function TableActions({ data }: { data: ProductTable }) {
       <DropdownMenuContent align="end">
         <DropdownMenuLabel>Actions</DropdownMenuLabel>
         <DropdownMenuSeparator />
-        <DropdownMenuItem>
+        <DropdownMenuItem onClick={() => toast.success(`deleting ${data.id}`)}>
           <Trash className="mr-2 h-4 w-4" />
           Delete
         </DropdownMenuItem>

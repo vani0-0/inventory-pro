@@ -11,4 +11,22 @@ export type ProductTable = {
   updatedAt: Date;
 };
 
+export type ProductCashier = {
+  id: string;
+  name: string;
+  sku: string;
+  price: number;
+  stock: number;
+  category: string;
+};
+
+export interface CartItem {
+  id: string;
+  name: string;
+  sku: string;
+  price: number;
+  quantity: number;
+  total: number;
+}
+
 export type ProductStatus = "In Stock" | "Low Stock" | "Out of Stock";

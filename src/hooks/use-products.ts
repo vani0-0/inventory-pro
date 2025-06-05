@@ -3,6 +3,7 @@ import {
   addProduct,
   getOverviews,
   getProducts,
+  getProductsForeSale,
 } from "@/server/product";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useRouter } from "next/navigation";
@@ -18,6 +19,13 @@ export function useGetProducts() {
   return useQuery({
     queryKey: ["products"],
     queryFn: getProducts,
+  });
+}
+
+export function useGetProductsForSale() {
+  return useQuery({
+    queryKey: ["productsForSale"],
+    queryFn: getProductsForeSale,
   });
 }
 

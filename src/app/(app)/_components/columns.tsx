@@ -2,7 +2,8 @@
 
 import { ProductTable } from "@/types/product.type";
 import { ColumnDef } from "@tanstack/react-table";
-import { TableActions } from "./table-actions";
+// import { TableActions } from "./table-actions";
+import { formatCurrency } from "@/lib/utils";
 
 export const columns: ColumnDef<ProductTable>[] = [
   { accessorKey: "name", header: "Name" },
@@ -12,17 +13,13 @@ export const columns: ColumnDef<ProductTable>[] = [
   {
     accessorKey: "price",
     header: "Price",
-    cell: (info) =>
-      new Intl.NumberFormat("en-PH", {
-        style: "currency",
-        currency: "PHP",
-      }).format(info.getValue() as number),
+    cell: (info) => formatCurrency(info.getValue() as number),
   },
   { accessorKey: "status", header: "Status" },
-  {
-    id: "actions",
-    cell: ({ row }) => {
-      return <TableActions data={row.original as ProductTable} />;
-    },
-  },
+  // {
+  //   id: "actions",
+  //   cell: ({ row }) => {
+  //     return <TableActions data={row.original as ProductTable} />;
+  //   },
+  // },
 ];

@@ -20,5 +20,6 @@ export async function getTransactions() {
     item: transaction.product.name,
     quantity: transaction.quantity,
     timestamp: transaction.createdAt,
+    reason: transaction.reason,
   }));
 }
