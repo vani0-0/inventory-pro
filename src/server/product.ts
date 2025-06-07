@@ -159,6 +159,7 @@ export async function addProduct(data: AddProductSchema) {
         category: parsedData.category,
         description: parsedData.description,
         price: parsedData.price,
+        orderLevel: parsedData.reorderLevel,
       },
       create: {
         sku: parsedData.sku,
@@ -166,6 +167,7 @@ export async function addProduct(data: AddProductSchema) {
         category: parsedData.category,
         description: parsedData.description,
         price: parsedData.price,
+        orderLevel: parsedData.reorderLevel,
       },
     });
 
