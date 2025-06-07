@@ -39,16 +39,23 @@ export async function getOverviews() {
     GROUP BY "productId"
   `;
 
-  function countStatus(stocks: { productId: string; quantity: bigint }[]) {
+  async function countStatus(
+    stocks: { productId: string; quantity: bigint }[]
+  ) {
     let total = 0,
       lowStock = 0,
       outOfStock = 0;
 
     for (const s of stocks) {
+      const product = await prisma.product.findUnique({
+        where: { id: s.productId },
+        select: { orderLevel: true },
+      });
+      const orderLevel = product?.orderLevel ?? 5;
       const qty = Number(s.quantity) || 0;
       if (qty === 0) {
         outOfStock++;
-      } else if (qty < 5) {
+      } else if (qty < orderLevel) {
         lowStock++;
         total++;
       } else {
@@ -59,8 +66,8 @@ export async function getOverviews() {
     return { total, lowStock, outOfStock };
   }
 
-  const current = countStatus(currentStocks);
-  const lastWeek = countStatus(lastWeekStocks);
+  const current = await countStatus(currentStocks);
+  const lastWeek = await countStatus(lastWeekStocks);
 
   return {
     total: {
