@@ -135,10 +135,10 @@ export async function getProducts(): Promise<ProductTable[]> {
 
   return products.map((product) => {
     const quantity = stockMap.get(product.id) ?? 0;
-
+    const orderLevel = product.orderLevel ?? 5;
     let status: ProductStatus = "In Stock";
     if (quantity === 0) status = "Out of Stock";
-    else if (quantity < 5) status = "Low Stock";
+    else if (quantity < orderLevel) status = "Low Stock";
 
     return {
       ...product,
